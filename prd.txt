@@ -1,0 +1,64 @@
+PRD: Sistema de Automação de Pedidos (WhatsApp IA + Gestão Dashboard)
+1. Visão Geral
+Um sistema unificado onde uma IA processa pedidos via WhatsApp, recomenda produtos e integra os dados em tempo real a um painel de gestão (Dashboard) para o dono e a cozinha.
+
+2. Personas e Interfaces
+Cliente (WhatsApp): Interage com uma IA conversacional para fazer pedidos, ver Realidade Aumentada (RA) e pagar.
+
+Gerente/Dono (Dashboard): Visualiza o mapa de mesas, status dos pedidos do WhatsApp e faturamento.
+
+Cozinha (KDS): Visualiza os itens a serem preparados em uma interface de alta velocidade.
+
+3. Requisitos Funcionais (Core)
+RF01: O "Cérebro" do WhatsApp (Código/IA)
+Processamento de Linguagem Natural (NLP): O bot deve entender pedidos informais (ex: "Me manda uma de queijo e uma coca") usando a API do Gemini/GPT.
+
+Recomendação Ativa: Se o cliente pedir um hambúrguer, a IA deve sugerir um acompanhamento.
+
+Gestão de Contexto: A IA deve lembrar o endereço e o nome do cliente (via Supabase) para não perguntar toda vez.
+
+Geração de Links de RA: Enviar links para visualização 3D quando solicitado ou no menu.
+
+RF02: Sincronização em Tempo Real
+Persistência: Todo pedido iniciado no WhatsApp deve ser criado na tabela orders do banco de dados com status pending.
+
+Webhooks: O código do WhatsApp deve disparar um webhook para atualizar a Dashboard instantaneamente quando o status mudar (ex: "Pagamento Confirmado").
+
+RF03: Gestão de Pagamentos (Pix/Cartão)
+Geração de QR Code: O código deve integrar com uma API de pagamento (ex: Stripe ou Mercado Pago) e enviar o QR Code Pix direto no chat.
+
+4. Arquitetura de Dados (Database Schema)
+Para que sua interface já existente funcione, o código do WhatsApp deve alimentar estas tabelas:
+
+customers: id, phone_number, name, last_address, preferences.
+
+orders: id, customer_id, origin (whatsapp/table), status (pending, preparing, ready, finished), total_price, payment_status.
+
+order_items: id, order_id, product_id, quantity, notes.
+
+tables: id, number, status (available, occupied, payment_requested).
+
+5. Fluxo da Automação (WhatsApp Coding)
+Entrada: Usuário manda mensagem -> Evolution API captura -> Envia para seu Backend (Node/Python).
+
+Processamento: Backend consulta Supabase (Cardápio) -> Envia para Gemini API (Prompt: Atendente de Restaurante) -> Retorna texto.
+
+Ação: Se a IA detectar intenção de compra -> Backend gera order no banco -> Notifica Dashboard via Realtime.
+
+Saída: Backend envia resposta para o usuário via WhatsApp.
+
+6. Requisitos de Interface (Dashboard Adptação)
+Notificações Sonoras: O código deve disparar um evento para a Dashboard tocar um som sempre que origin == 'whatsapp'.
+
+Botão de Intervenção: O dono deve poder clicar em "Assumir Chat" na Dashboard, o que pausa a IA temporariamente para ele falar manualmente.
+
+Status Visual: Pedidos vindos do WhatsApp devem ter um ícone ou cor diferente no seu grid de gestão.
+
+7. Roadmap de Implementação (Fases)
+Fase 1 (MVP): Conexão WhatsApp -> Banco de Dados -> Interface (sem pagamento automático).
+
+Fase 2 (Pagamento): Implementação de Pix automático no fluxo de código.
+
+Fase 3 (Uau): Integração dos links de Realidade Aumentada no fluxo da IA.
+
+Fase 4 (Escala): Multi-restaurantes (White Label) se o objetivo for vender o software.
