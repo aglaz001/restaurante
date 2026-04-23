@@ -1,0 +1,5 @@
+{
+  "buildCommand": "cd interface && npm install && npm run build",
+  "outputDirectory": "interface/.next",
+  "installCommand": "cd interface && npm install"
+}
